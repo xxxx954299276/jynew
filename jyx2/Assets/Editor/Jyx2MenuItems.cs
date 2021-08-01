@@ -1,6 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Threading;
+using CSObjectWrapEditor;
+using DG.DemiLib;
 using Jyx2.Editor;
 using UnityEngine;
 using UnityEditor;
@@ -110,60 +113,81 @@ namespace Jyx2Editor
             GenDataMenuCmd.GenerateDataForce();
 
             // 处理场景文件
-            AddScenesToBuildTool.AddScenesToBuild();
+            //AddScenesToBuildTool.AddScenesToBuild();
 
             //打包
             BuildPipeline.BuildPlayer(GetScenePaths(), path + "/jyx2.exe", BuildTarget.StandaloneWindows64, BuildOptions.None);
-            
+
             //强制移动目录
             //System.IO.Directory.Move("StandaloneWindows64", path + "/StandaloneWindows64");
 
             EditorUtility.DisplayDialog("打包完成", "输出目录:" + path, "确定");
         }
         
+        
         static string[] GetScenePaths() {
-            string[] scenes = new string[EditorBuildSettings.scenes.Length];
+            /*string[] scenes = new string[EditorBuildSettings.scenes.Length];
             for(int i = 0; i < scenes.Length; i++) {
                 scenes[i] = EditorBuildSettings.scenes[i].path;
             }
-            return scenes;
+            return scenes;*/
+
+            return new string[] {"Assets/Jyx2Scenes/0_GameStart.unity"};
         }
         
         [MenuItem("一键打包/Android")]
         private static void BuildAndroid()
         {
+            if (!EditorUtility.DisplayDialog("重要提示", 
+                "请先手动运行xLua/Generate Code，再执行本指令，否则可能打包出来黑屏", "继续!", "取消"))
+                return;
+            
             //BUILD
             string path = EditorUtility.SaveFolderPanel("选择打包输出目录", "", "");
 
-            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTarget.Android);
-        
+            try
+            {
+                EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTarget.Android);
 
-            if (string.IsNullOrEmpty(path))
-                return;
-            
-            //重新生成Addressable相关文件
-            AddressableAssetSettings.BuildPlayerContent();
-            
-            
-            //强制GENDATA
-            GenDataMenuCmd.GenerateDataForce();
+                if (string.IsNullOrEmpty(path))
+                    return;
 
-            // 处理场景文件
-            AddScenesToBuildTool.AddScenesToBuild();
+                //生成luaWrap
+                //Generator.ClearAll();
+                //Generator.GenAll();
 
-            string apkPath = path + $"/jyx2AndroidBuild-{DateTime.Now.ToString("yyyyMMdd")}.apk";
-            
-            //动态设置keystore的密码
-            PlayerSettings.Android.keystorePass = "123456";
-            PlayerSettings.Android.keyaliasPass = "123456";
-            
-            //打包
-            BuildPipeline.BuildPlayer(GetScenePaths(), apkPath, BuildTarget.Android, BuildOptions.None);
-            
-            //强制移动目录
-            //System.IO.Directory.Move("StandaloneWindows64", path + "/StandaloneWindows64");
+                //重新生成Addressable相关文件
+                AddressableAssetSettings.BuildPlayerContent();
 
-            EditorUtility.DisplayDialog("打包完成", "输出文件:" + apkPath, "确定");
+                //强制GENDATA
+                GenDataMenuCmd.GenerateDataForce();
+
+                // 处理场景文件
+                //AddScenesToBuildTool.AddScenesToBuild();
+
+                string apkPath = path + $"/jyx2AndroidBuild-{DateTime.Now.ToString("yyyyMMdd")}.apk";
+
+                //动态设置keystore的密码
+                PlayerSettings.Android.keystorePass = "123456";
+                PlayerSettings.Android.keyaliasPass = "123456";
+
+                //打包
+                BuildPipeline.BuildPlayer(GetScenePaths(), apkPath, BuildTarget.Android, BuildOptions.None);
+
+                //强制移动目录
+                //System.IO.Directory.Move("StandaloneWindows64", path + "/StandaloneWindows64");
+
+                EditorUtility.DisplayDialog("打包完成", "输出文件:" + apkPath, "确定");
+
+                //清理luaWrap
+                //Generator.ClearAll();
+                AssetDatabase.Refresh();
+            }
+            catch (Exception e)
+            {
+                EditorUtility.DisplayDialog("打包出错", e.ToString(), "确定");
+                Debug.LogError(e.StackTrace);
+            }
         }
     }
 }

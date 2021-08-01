@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -21,6 +22,7 @@ public sealed class AddScenesToBuildTool
     {
     };
 
+    [Obsolete("20210729: 由于场景都使用Addressable的方式动态加载了，不再需要强制添加到BUILD")]
     [MenuItem("Tools/场景/AddScenesToBuild")]
     public static void AddScenesToBuild()
     {

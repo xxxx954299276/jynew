@@ -133,7 +133,17 @@ public class XiakePanelUI : MonoBehaviour
         sb.AppendLine("防具：" + (armor == null ? "" : armor.Name));
 
         var xiulianItem = role.GetXiulianItem();
-        sb.AppendLine("修炼：" + (xiulianItem == null ? "" : xiulianItem.Name + $"({role.ExpForItem}/{role.GetFinishedExpForItem()})")); 
+		var xiulianString="修炼：";
+		if(xiulianItem != null)
+		{
+			if(role.GetWugongLevel(xiulianItem.Wugong)<10)
+			{
+				xiulianString+="-/{role.GetFinishedExpForItem()}";
+			}else{
+				xiulianString+=xiulianItem.Name + $"({role.ExpForItem}/{role.GetFinishedExpForItem()})";
+			}
+		}
+        sb.AppendLine(xiulianString); 
 
         return sb.ToString();
     }
@@ -169,11 +179,11 @@ public class XiakePanelUI : MonoBehaviour
             {
                 if (_role.Weapon != -1)
                 {
-                    runtime.AddItem(_role.Weapon, 1);
+                    // runtime.AddItem(_role.Weapon, 1);
                     _role.Weapon = -1;
                 }
             },
-            (item) => { return item.EquipmentType == 0; });
+            (item) => { return item.EquipmentType == 0;});
     }
 
     public void OnSelectArmor()
@@ -241,14 +251,13 @@ public class XiakePanelUI : MonoBehaviour
                 MessageBox.Create("该角色不满足使用条件", null);
                 return;
             }
-
-            //卸下现有
-            unquipCallback();
-
+            
             if (itemId != -1)
             {
+                //卸下现有
                 unquipCallback();
-                runtime.AddItem(itemId, -1);
+                //装备选择的武器
+                // runtime.AddItem(itemId,-1);
                 callback(itemId);
             }
 

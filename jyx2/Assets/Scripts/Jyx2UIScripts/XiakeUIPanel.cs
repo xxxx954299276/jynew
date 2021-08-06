@@ -116,10 +116,13 @@ public partial class XiakeUIPanel:Jyx2_UIBase
     string GetInfoText(RoleInstance role)
     {
         StringBuilder sb = new StringBuilder();
+		var color=role.MpType==0?ColorStringDefine.Default:role.MpType==1?ColorStringDefine.Mp_type1:ColorStringDefine.Mp_type2;
+		var color1=role.Hurt>20?ColorStringDefine.Hp_hurt_heavy:role.Hurt>0?ColorStringDefine.Hp_hurt_light:ColorStringDefine.Default;
+		var color2=role.Poison>0?ColorStringDefine.Hp_posion:ColorStringDefine.Default;
         sb.AppendLine($"等级 {role.Level}");
         sb.AppendLine($"体力 {role.Tili}/{GameConst.MaxTili}");
-        sb.AppendLine($"生命 {role.Hp}/{role.MaxHp}");
-        sb.AppendLine($"内力 {role.Mp}/{role.MaxMp}");
+        sb.AppendLine($"生命 <color={color1}>{role.Hp}</color>/<color={color2}>{role.MaxHp}</color>");
+        sb.AppendLine($"内力 <color={color}>{role.Mp}/{role.MaxMp}</color>");
         sb.AppendLine($"经验 {role.Exp}/{role.GetLevelUpExp()}");
         sb.AppendLine();
         sb.AppendLine($"攻击 {role.Attack}");
@@ -212,12 +215,12 @@ public partial class XiakeUIPanel:Jyx2_UIBase
             {
                 if (m_currentRole.Weapon != -1)
                 {
-                    runtime.AddItem(m_currentRole.Weapon, 1);
+                    // runtime.AddItem(m_currentRole.Weapon, 1);
                     m_currentRole.UnequipItem(m_currentRole.GetWeapon());
                     m_currentRole.Weapon = -1;
                 }
             },
-            (item) => { return item.EquipmentType == 0; });
+            (item) => { return item.EquipmentType == 0 && item.Id!=m_currentRole.Weapon.ToString(); });
     }
 
     void OnArmorClick() 
@@ -232,12 +235,12 @@ public partial class XiakeUIPanel:Jyx2_UIBase
             {
                 if (m_currentRole.Armor != -1)
                 {
-                    runtime.AddItem(m_currentRole.Armor, 1);
+                    // runtime.AddItem(m_currentRole.Armor, 1);
                     m_currentRole.UnequipItem(m_currentRole.GetArmor());
                     m_currentRole.Armor = -1;
                 }
             },
-            (item) => { return item.EquipmentType == 1; });
+            (item) => { return item.EquipmentType == 1 && item.Id!=m_currentRole.Armor.ToString(); });
     }
 
     void OnXiulianClick() 
@@ -252,12 +255,12 @@ public partial class XiakeUIPanel:Jyx2_UIBase
             {
                 if (m_currentRole.Xiulianwupin != -1)
                 {
-                    runtime.AddItem(m_currentRole.Xiulianwupin, 1);
+                    // runtime.AddItem(m_currentRole.Xiulianwupin, 1);
                     m_currentRole.UnequipItem(m_currentRole.GetXiulianItem()); // Maybe this shouldn't be unequipped? Still need to change
                     m_currentRole.Xiulianwupin = -1;
                 }
             },
-            (item) => { return item.ItemType == 2; });
+            (item) => { return item.ItemType == 2 && item.Id!=m_currentRole.Xiulianwupin.ToString(); });
     }
 
     void SelectFromBag(Action<int> callback, Action unquipCallback, Func<Jyx2Item, bool> filter)
@@ -277,7 +280,7 @@ public partial class XiakeUIPanel:Jyx2_UIBase
             if (itemId != -1)
             {
                 unquipCallback();
-                runtime.AddItem(itemId, -1);
+                // runtime.AddItem(itemId, -1);
                 callback(itemId);
             }
 
